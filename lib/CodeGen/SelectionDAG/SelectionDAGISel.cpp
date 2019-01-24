@@ -629,6 +629,16 @@ bool SelectionDAGISel::runOnMachineFunction(MachineFunction &mf) {
   LLVM_DEBUG(dbgs() << "*** MachineFunction at end of ISel ***\n");
   LLVM_DEBUG(MF->print(dbgs()));
 
+  // Loop over all BasicBlocks (scopes) in the function
+  for (auto &BasicBlock : mf) {
+	  MachineInstrBundleIterator<MachineInstr> RetInst = getReturnInstructionForBasicBlock(BasicBlock);
+
+	  // Ensure RetInst isn't actually a null pointer and insert Noop before it
+	  if (RetInst.isValid()) {
+		  insertNoopBeforeBlockInstruction(BasicBlock, RetInst, mf.getSubtarget().getInstrInfo());
+	  }
+  }
+
   return true;
 }
 
@@ -954,6 +964,26 @@ void SelectionDAGISel::CodeGenAndEmitDAG() {
   // Free the SelectionDAG state, now that we're finished with it.
   CurDAG->clear();
 }
+
+MachineInstrBundleIterator<MachineInstr> SelectionDAGISel::getReturnInstructionForBasicBlock(MachineBasicBlock & BasicBlock)
+{
+	for (MachineBasicBlock::iterator Iter = BasicBlock.begin(); Iter != BasicBlock.end(); ++Iter) {
+		if (Iter->isReturn()) return Iter;
+	}
+
+	return MachineInstrBundleIterator<MachineInstr>();
+}
+
+void SelectionDAGISel::insertNoopBeforeBlockInstruction(MachineBasicBlock & BasicBlock, MachineInstrBundleIterator<MachineInstr> Instr, const TargetInstrInfo* TargetInstructionInfo)
+{
+	DebugLoc DL;
+	MCInst NopInst;
+	TargetInstructionInfo->getNoop(NopInst);
+
+	// Build the machine instruction before return instr;
+	BuildMI(BasicBlock, Instr, DL, TargetInstructionInfo->get(NopInst.getOpcode()));
+}
+
 
 namespace {
 

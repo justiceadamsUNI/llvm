@@ -322,6 +322,16 @@ private:
 
   void CodeGenAndEmitDAG();
 
+  // Take In a Basic Block and loop over it to find the return instruction, if any.
+  // If no instruction is a return instruction, return Null
+  MachineInstrBundleIterator<MachineInstr> getReturnInstructionForBasicBlock(MachineBasicBlock& BasicBlock);
+
+  // Takes in an machine instruction and inserts a no-op before it
+  void insertNoopBeforeBlockInstruction(
+	  MachineBasicBlock& BasicBlock,
+	  MachineInstrBundleIterator<MachineInstr> Instr, 
+	  const TargetInstrInfo* TargetInstructionInfo);
+
   /// Generate instructions for lowering the incoming arguments of the
   /// given function.
   void LowerArguments(const Function &F);
