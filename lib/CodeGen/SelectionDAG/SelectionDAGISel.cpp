@@ -311,6 +311,9 @@ SelectionDAGISel::SelectionDAGISel(TargetMachine &tm,
   AA(), GFI(),
   OptLevel(OL),
   DAGSize(0) {
+	// seed random number generator
+	std::srand(std::time(NULL));
+
     initializeGCModuleInfoPass(*PassRegistry::getPassRegistry());
     initializeBranchProbabilityInfoWrapperPassPass(
         *PassRegistry::getPassRegistry());
@@ -635,7 +638,14 @@ bool SelectionDAGISel::runOnMachineFunction(MachineFunction &mf) {
 
 	  // Ensure RetInst isn't actually a null pointer and insert Noop before it
 	  if (RetInst.isValid()) {
-		  insertNoopBeforeBlockInstruction(BasicBlock, RetInst, mf.getSubtarget().getInstrInfo());
+		  // Generate random number between 1 and 10
+		  int NoOpCount = (std::rand() % 10) + 1;
+		  
+		  // Insert Nops Into Program
+		  //dbgs() << "***NOP COUNT = " << NoOpCount;
+		  for (int n = 0; n < NoOpCount; ++n) {
+			  insertNoopBeforeBlockInstruction(BasicBlock, RetInst, mf.getSubtarget().getInstrInfo());
+		  }
 	  }
   }
 
