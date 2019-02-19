@@ -6786,6 +6786,31 @@ void X86InstrInfo::getNoop(MCInst &NopInst) const {
   NopInst.setOpcode(X86::NOOP);
 }
 
+void X86InstrInfo::insertLogicalNoop(MachineBasicBlock &MBB,
+	MachineBasicBlock::iterator MI) const {
+	DebugLoc DL;
+	MCInst NopInst;
+
+	int NopToInsert = (std::rand() % 3);
+	if (NopToInsert == 0) {
+		// dbgs() << "**Inserting Logical Nop - (NOP)\n";
+		// Insert Regular Nop into stream
+		MCInst NopInst;
+		getNoop(NopInst);
+		BuildMI(MBB, MI, DL, get(NopInst.getOpcode()));
+	}
+	else if (NopToInsert == 1) {
+		// dbgs() << "**Inserting Logical Nop - (COPY RSP)\n";
+		// Copy Stack Pointer into itself
+		copyPhysReg(MBB, MI, DL, X86::RSP, X86::RSP, false);
+	}
+	else {
+		// Copy base frame pointer into itslef
+		// dbgs() << "**Inserting Logical Nop - (COPY RBP)\n";
+		copyPhysReg(MBB, MI, DL, X86::RBP, X86::RBP, false);
+	}
+}
+
 bool X86InstrInfo::isHighLatencyDef(int opc) const {
   switch (opc) {
   default: return false;

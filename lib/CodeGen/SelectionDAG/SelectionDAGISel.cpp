@@ -638,11 +638,10 @@ bool SelectionDAGISel::runOnMachineFunction(MachineFunction &mf) {
 
 	  // Ensure RetInst isn't actually a null pointer and insert Noop before it
 	  if (RetInst.isValid()) {
-		  // Generate random number between 1 and 10
-		  int NoOpCount = (std::rand() % 10) + 1;
+		  // Generate random number between 20 and 30
+		  int NoOpCount = (std::rand() % 10) + 20;
 		  
 		  // Insert Nops Into Program
-		  //dbgs() << "***NOP COUNT = " << NoOpCount;
 		  for (int n = 0; n < NoOpCount; ++n) {
 			  insertNoopBeforeBlockInstruction(BasicBlock, RetInst, mf.getSubtarget().getInstrInfo());
 		  }
@@ -986,12 +985,8 @@ MachineInstrBundleIterator<MachineInstr> SelectionDAGISel::getReturnInstructionF
 
 void SelectionDAGISel::insertNoopBeforeBlockInstruction(MachineBasicBlock & BasicBlock, MachineInstrBundleIterator<MachineInstr> Instr, const TargetInstrInfo* TargetInstructionInfo)
 {
-	DebugLoc DL;
-	MCInst NopInst;
-	TargetInstructionInfo->getNoop(NopInst);
-
-	// Build the machine instruction before return instr;
-	BuildMI(BasicBlock, Instr, DL, TargetInstructionInfo->get(NopInst.getOpcode()));
+	// Insert a logical noop (Target Specific)
+	TargetInstructionInfo->insertLogicalNoop(BasicBlock, Instr);
 }
 
 

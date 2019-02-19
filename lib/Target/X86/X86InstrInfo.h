@@ -440,6 +440,8 @@ public:
                                unsigned NumLoads) const override;
 
   void getNoop(MCInst &NopInst) const override;
+  
+  void insertLogicalNoop(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI) const override;
 
   bool
   reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;

@@ -67,6 +67,12 @@ void TargetInstrInfo::insertNoop(MachineBasicBlock &MBB,
   llvm_unreachable("Target didn't implement insertNoop!");
 }
 
+/// Insert a "Logical Nop" into the instruction stream at the specified point.
+void TargetInstrInfo::insertLogicalNoop(MachineBasicBlock &MBB,
+	MachineBasicBlock::iterator MI) const {
+	llvm_unreachable("Target didn't implement insertLogicalNoop!");
+}
+
 static bool isAsmComment(const char *Str, const MCAsmInfo &MAI) {
   return strncmp(Str, MAI.getCommentString().data(),
                  MAI.getCommentString().size()) == 0;

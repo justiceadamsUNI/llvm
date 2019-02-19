@@ -1180,6 +1180,9 @@ public:
   /// Insert a noop into the instruction stream at the specified point.
   virtual void insertNoop(MachineBasicBlock &MBB,
                           MachineBasicBlock::iterator MI) const;
+						  
+  /// Insert a "Logical Nop" into the instruction stream at the specified point.
+  virtual void insertLogicalNoop(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI) const;
 
   /// Return the noop instruction to use for a noop.
   virtual void getNoop(MCInst &NopInst) const;
