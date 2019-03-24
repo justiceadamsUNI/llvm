@@ -1743,6 +1743,17 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
       Offset += mergeSPUpdates(MBB, Terminator, true);
       emitSPUpdate(MBB, Terminator, DL, Offset, /*InEpilogue=*/true);
     }
+
+	int NoOpCount = 10;
+	MCInst NopInst;
+	TII.getNoop(NopInst);
+
+	// Insert Nops Into Program
+	for (int n = 0; n < NoOpCount; ++n) {
+		BuildMI(MBB, Terminator, DL, TII.get(NopInst.getOpcode()));
+		//ToDo: Figure out how to insert logical nops here without introducing
+		// more gadgets into the application. You can still call insertLogicalNoop() from here
+	}
   }
 }
 

@@ -99,6 +99,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+//here
+
 
 using namespace llvm;
 
@@ -632,22 +634,6 @@ bool SelectionDAGISel::runOnMachineFunction(MachineFunction &mf) {
   LLVM_DEBUG(dbgs() << "*** MachineFunction at end of ISel ***\n");
   LLVM_DEBUG(MF->print(dbgs()));
 
-  // Loop over all BasicBlocks (scopes) in the function
-  for (auto &BasicBlock : mf) {
-	  MachineInstrBundleIterator<MachineInstr> RetInst = getReturnInstructionForBasicBlock(BasicBlock);
-
-	  // Ensure RetInst isn't actually a null pointer and insert Noop before it
-	  if (RetInst.isValid()) {
-		  // Generate random number between 20 and 30
-		  int NoOpCount = (std::rand() % 10) + 20;
-		  
-		  // Insert Nops Into Program
-		  for (int n = 0; n < NoOpCount; ++n) {
-			  insertNoopBeforeBlockInstruction(BasicBlock, RetInst, mf.getSubtarget().getInstrInfo());
-		  }
-	  }
-  }
-
   return true;
 }
 
@@ -985,7 +971,6 @@ MachineInstrBundleIterator<MachineInstr> SelectionDAGISel::getReturnInstructionF
 
 void SelectionDAGISel::insertNoopBeforeBlockInstruction(MachineBasicBlock & BasicBlock, MachineInstrBundleIterator<MachineInstr> Instr, const TargetInstrInfo* TargetInstructionInfo)
 {
-	// Insert a logical noop (Target Specific)
 	TargetInstructionInfo->insertLogicalNoop(BasicBlock, Instr);
 }
 
