@@ -1077,6 +1077,7 @@ void SelectionDAGBuilder::visit(const Instruction &I) {
 
   CurInst = &I;
 
+
   visit(I.getOpcode(), I);
 
   if (auto *FPMO = dyn_cast<FPMathOperator>(&I)) {

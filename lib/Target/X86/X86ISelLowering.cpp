@@ -2304,7 +2304,7 @@ X86TargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
   RetOps.push_back(Chain); // Operand #0 = Chain (updated below)
   // Operand #1 = Bytes To Pop
   RetOps.push_back(DAG.getTargetConstant(FuncInfo->getBytesToPopOnReturn(), dl,
-                   MVT::i32));
+                   MVT::i32)); // NOTES -> THIS LINE OF CODE ALTERS THE RETURN VALUE (just the value with the ret statement)
 
   // Copy the result values into the output registers.
   for (unsigned I = 0, OutsIndex = 0, E = RVLocs.size(); I != E;
@@ -2479,6 +2479,9 @@ X86TargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
   X86ISD::NodeType opcode = X86ISD::RET_FLAG;
   if (CallConv == CallingConv::X86_INTR)
     opcode = X86ISD::IRET;
+
+
+  //return DAG.getNode(ISD::TRAP, dl, MVT::Other, RetOps);
   return DAG.getNode(opcode, dl, MVT::Other, RetOps);
 }
 

@@ -182,6 +182,16 @@ namespace {
       Subtarget = &MF.getSubtarget<X86Subtarget>();
       IndirectTlsSegRefs = MF.getFunction().hasFnAttribute(
                              "indirect-tls-seg-refs");
+	  for (auto &BB : MF) {
+		  for (MachineBasicBlock::iterator I = BB.begin(), E = BB.end(); I != E; ++I) {
+			  if (I->isPseudo()) {
+				  continue;
+			  } else {
+				  dbgs() << "looping over instructions";
+			  }
+		  }
+	  }
+
       SelectionDAGISel::runOnMachineFunction(MF);
       return true;
     }

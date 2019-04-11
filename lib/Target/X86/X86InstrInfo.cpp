@@ -6789,26 +6789,39 @@ void X86InstrInfo::getNoop(MCInst &NopInst) const {
 void X86InstrInfo::insertLogicalNoop(MachineBasicBlock &MBB,
 	MachineBasicBlock::iterator MI) const {
 	DebugLoc DL;
-	MCInst NopInst;
 
-	int NopToInsert = (std::rand() % 3);
-	if (NopToInsert == 0) {
-		// dbgs() << "**Inserting Logical Nop - (NOP)\n";
-		// Insert Regular Nop into stream
-		MCInst NopInst;
-		getNoop(NopInst);
-		BuildMI(MBB, MI, DL, get(NopInst.getOpcode()));
+	// Randomized instruction selection
+	int nopToInsert = (std::rand() % 3);
+	if (nopToInsert == 0) {
+		dbgs() << "**Inserting Logical Nop - (Register offset)\n";
+		// Insert Register offset of zero Nop into stream
+        addRegOffset(
+			BuildMI(MBB, MI, DL, get(X86::LEA64r), X86::RDI), 
+			X86::RDI,
+            false,
+            0);
 	}
-	else if (NopToInsert == 1) {
-		// dbgs() << "**Inserting Logical Nop - (COPY RSP)\n";
+	else if (nopToInsert == 1) {
+		dbgs() << "**Inserting Logical Nop - (COPY RSP)\n";
 		// Copy Stack Pointer into itself
 		copyPhysReg(MBB, MI, DL, X86::RSP, X86::RSP, false);
 	}
 	else {
-		// Copy base frame pointer into itslef
-		// dbgs() << "**Inserting Logical Nop - (COPY RBP)\n";
+		// Copy base frame pointer into itself
+		dbgs() << "**Inserting Logical Nop - (COPY RBP)\n";
 		copyPhysReg(MBB, MI, DL, X86::RBP, X86::RBP, false);
 	}
+}
+
+void X86InstrInfo::insertNoop(MachineBasicBlock &MBB,
+                                     MachineBasicBlock::iterator MI) const {
+  DebugLoc DL;
+  MCInst NopInst;
+
+  // Insert Regular Nop into stream
+  dbgs() << "**Inserting Nop - (ACTUAL NOP)\n";
+  getNoop(NopInst);
+  BuildMI(MBB, MI, DL, get(NopInst.getOpcode()));
 }
 
 bool X86InstrInfo::isHighLatencyDef(int opc) const {

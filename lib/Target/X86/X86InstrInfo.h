@@ -374,6 +374,8 @@ public:
 
   bool expandPostRAPseudo(MachineInstr &MI) const override;
 
+
+
   /// Check whether the target can fold a load that feeds a subreg operand
   /// (or a subreg operand that feeds a store).
   bool isSubregFoldable() const override { return true; }
@@ -440,8 +442,10 @@ public:
                                unsigned NumLoads) const override;
 
   void getNoop(MCInst &NopInst) const override;
-  
+
   void insertLogicalNoop(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI) const override;
+
+  void insertNoop(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI) const override;
 
   bool
   reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;

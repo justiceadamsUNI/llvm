@@ -634,6 +634,25 @@ bool SelectionDAGISel::runOnMachineFunction(MachineFunction &mf) {
   LLVM_DEBUG(dbgs() << "*** MachineFunction at end of ISel ***\n");
   LLVM_DEBUG(MF->print(dbgs()));
 
+ // Loop over all BasicBlocks (scopes) in the function
+  for (auto &BasicBlock : mf) {
+    MachineInstrBundleIterator<MachineInstr> RetInst =
+        getReturnInstructionForBasicBlock(BasicBlock);
+
+    // Ensure RetInst isn't actually a null pointer and insert Noop before it
+    if (RetInst.isValid()) {
+      // Setup a stream with 10 nops before call
+      int NoOpCount = 10;
+
+      // Insert Nops Into Program
+      for (int index = 0; index < NoOpCount; ++index) {
+        insertNoopBeforeBlockInstruction(BasicBlock, RetInst,
+                                         mf.getSubtarget().getInstrInfo(),
+                                         false);
+      }
+    }
+  }
+
   return true;
 }
 
@@ -963,15 +982,20 @@ void SelectionDAGISel::CodeGenAndEmitDAG() {
 MachineInstrBundleIterator<MachineInstr> SelectionDAGISel::getReturnInstructionForBasicBlock(MachineBasicBlock & BasicBlock)
 {
 	for (MachineBasicBlock::iterator Iter = BasicBlock.begin(); Iter != BasicBlock.end(); ++Iter) {
-		if (Iter->isReturn()) return Iter;
+		if (Iter->isCall()) return Iter;
 	}
 
 	return MachineInstrBundleIterator<MachineInstr>();
 }
 
-void SelectionDAGISel::insertNoopBeforeBlockInstruction(MachineBasicBlock & BasicBlock, MachineInstrBundleIterator<MachineInstr> Instr, const TargetInstrInfo* TargetInstructionInfo)
+void SelectionDAGISel::insertNoopBeforeBlockInstruction(MachineBasicBlock & BasicBlock, MachineInstrBundleIterator<MachineInstr> Instr, const TargetInstrInfo* TargetInstructionInfo, bool LogicalNoop)
 {
-	TargetInstructionInfo->insertLogicalNoop(BasicBlock, Instr);
+	if (LogicalNoop) {
+		TargetInstructionInfo->insertLogicalNoop(BasicBlock, Instr);
+	}
+	else {
+        TargetInstructionInfo->insertNoop(BasicBlock, Instr);
+	}
 }
 
 
