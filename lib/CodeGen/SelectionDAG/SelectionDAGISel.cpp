@@ -636,21 +636,19 @@ bool SelectionDAGISel::runOnMachineFunction(MachineFunction &mf) {
 
  // Loop over all BasicBlocks (scopes) in the function
   for (auto &BasicBlock : mf) {
-    MachineInstrBundleIterator<MachineInstr> RetInst =
-        getReturnInstructionForBasicBlock(BasicBlock);
+	  for (MachineBasicBlock::iterator Iter = BasicBlock.begin(); Iter != BasicBlock.end(); ++Iter) {
+		  if (Iter->isCall() || Iter.isValid()) {
+			  int NoOpCount = 10;
 
-    // Ensure RetInst isn't actually a null pointer and insert Noop before it
-    if (RetInst.isValid()) {
-      // Setup a stream with 10 nops before call
-      int NoOpCount = 10;
-
-      // Insert Nops Into Program
-      for (int index = 0; index < NoOpCount; ++index) {
-        insertNoopBeforeBlockInstruction(BasicBlock, RetInst,
-                                         mf.getSubtarget().getInstrInfo(),
-                                         false);
-      }
-    }
+			  // Insert Nops Into Program before call instr
+			  for (int index = 0; index < NoOpCount; ++index) {
+				  insertNoopBeforeBlockInstruction(BasicBlock, 
+					  Iter,
+					  mf.getSubtarget().getInstrInfo(),
+					  false);
+			  }
+		  }
+	  }
   }
 
   return true;
