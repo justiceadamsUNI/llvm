@@ -6793,13 +6793,10 @@ void X86InstrInfo::insertLogicalNoop(MachineBasicBlock &MBB,
 	// Randomized instruction selection
 	int nopToInsert = (std::rand() % 3);
 	if (nopToInsert == 0) {
-		dbgs() << "**Inserting Logical Nop - (Register offset)\n";
-		// Insert Register offset of zero Nop into stream
-        addRegOffset(
-			BuildMI(MBB, MI, DL, get(X86::LEA64r), X86::RDI), 
-			X86::RDI,
-            false,
-            0);
+		dbgs() << "**Inserting Logical Nop - (COPY RSP)\n";
+		// Copy Stack Pointer into itself
+		// ToDo: We need to add a new instruction here
+		copyPhysReg(MBB, MI, DL, X86::RSP, X86::RSP, false);
 	}
 	else if (nopToInsert == 1) {
 		dbgs() << "**Inserting Logical Nop - (COPY RSP)\n";

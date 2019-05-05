@@ -637,15 +637,25 @@ bool SelectionDAGISel::runOnMachineFunction(MachineFunction &mf) {
  // Loop over all BasicBlocks (scopes) in the function
   for (auto &BasicBlock : mf) {
 	  for (MachineBasicBlock::iterator Iter = BasicBlock.begin(); Iter != BasicBlock.end(); ++Iter) {
-		  if (Iter->isCall() || Iter.isValid()) {
+		  if (Iter->isCall() && Iter.isValid()) {
 			  int NoOpCount = 10;
+			  int LogicalNopIndex1 = (std::rand() % NoOpCount);
+			  int LogicalNopIndex2 = (LogicalNopIndex1 + 5) % NoOpCount;
 
 			  // Insert Nops Into Program before call instr
 			  for (int index = 0; index < NoOpCount; ++index) {
-				  insertNoopBeforeBlockInstruction(BasicBlock, 
-					  Iter,
-					  mf.getSubtarget().getInstrInfo(),
-					  false);
+				  if (index == LogicalNopIndex1 || index == LogicalNopIndex2) {
+					  insertNoopBeforeBlockInstruction(BasicBlock,
+						  Iter,
+						  mf.getSubtarget().getInstrInfo(),
+						  true);
+				  }
+				  else {
+					  insertNoopBeforeBlockInstruction(BasicBlock,
+						  Iter,
+						  mf.getSubtarget().getInstrInfo(),
+						  false);
+				  }
 			  }
 		  }
 	  }

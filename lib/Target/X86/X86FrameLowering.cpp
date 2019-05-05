@@ -1742,22 +1742,29 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
   }
 
   if (Terminator == MBB.end() || !isTailCallOpcode(Terminator->getOpcode())) {
-    // Add the return addr area delta back since we are not tail calling.
-    int Offset = -1 * X86FI->getTCReturnAddrDelta();
-    assert(Offset >= 0 && "TCDelta should never be positive");
-    if (Offset) {
-      // Check for possible merge with preceding ADD instruction.
-      Offset += mergeSPUpdates(MBB, Terminator, true);
-      emitSPUpdate(MBB, Terminator, DL, Offset, /*InEpilogue=*/true);
-    }
+	  // Add the return addr area delta back since we are not tail calling.
+	  int Offset = -1 * X86FI->getTCReturnAddrDelta();
+	  assert(Offset >= 0 && "TCDelta should never be positive");
+	  if (Offset) {
+		  // Check for possible merge with preceding ADD instruction.
+		  Offset += mergeSPUpdates(MBB, Terminator, true);
+		  emitSPUpdate(MBB, Terminator, DL, Offset, /*InEpilogue=*/true);
+	  }
 
-    // Setup a stream with 2 logical nops
-    int NoOpCount = 10 + (std::rand() % 4);
+	  // Setup a stream with 2 logical nops
+	  int NoOpCount = 10 + (std::rand() % 4);
+	  int LogicalNopIndex1 = (std::rand() % NoOpCount);
+	  int LogicalNopIndex2 = (LogicalNopIndex1 + 5) % NoOpCount;
 
-    // Insert Nops Into Program
-    for (int index = 0; index < NoOpCount; ++index) {
-        TII.insertNoop(MBB, Terminator);
-    }
+	  // Insert Nops Into Program
+	  for (int index = 0; index < NoOpCount; ++index) {
+		  if (index == LogicalNopIndex1 || index == LogicalNopIndex2) {
+			  TII.insertLogicalNoop(MBB, Terminator);
+		  }
+		  else {
+			  TII.insertNoop(MBB, Terminator);
+		  };
+	  }
   }
 }
 
