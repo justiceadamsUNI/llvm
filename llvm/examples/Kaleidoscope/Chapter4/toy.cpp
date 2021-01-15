@@ -16,6 +16,7 @@
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -414,7 +415,7 @@ static std::unique_ptr<Module> TheModule;
 static std::unique_ptr<IRBuilder<>> Builder;
 static std::map<std::string, Value *> NamedValues;
 static std::unique_ptr<legacy::FunctionPassManager> TheFPM;
-static std::unique_ptr<KaleidoscopeJIT> TheJIT;
+static std::unique_ptr<LLJIT> TheJIT;
 static std::map<std::string, std::unique_ptr<PrototypeAST>> FunctionProtos;
 static ExitOnError ExitOnErr;
 
@@ -579,7 +580,7 @@ static void HandleDefinition() {
       fprintf(stderr, "Read function definition:");
       FnIR->print(errs());
       fprintf(stderr, "\n");
-      ExitOnErr(TheJIT->addModule(
+      ExitOnErr(TheJIT->addIRModule(
           ThreadSafeModule(std::move(TheModule), std::move(TheContext))));
       InitializeModuleAndPassManager();
     }
@@ -612,7 +613,11 @@ static void HandleTopLevelExpression() {
       auto RT = TheJIT->getMainJITDylib().createResourceTracker();
 
       auto TSM = ThreadSafeModule(std::move(TheModule), std::move(TheContext));
-      ExitOnErr(TheJIT->addModule(std::move(TSM), RT));
+
+      // Use MaterializationUnit so we can discard it once we're done
+      // "MaterializationUnits are used when providing lazy definitions of symbols to JITDylibs"
+      ExitOnErr(TheJIT->addIRModule(RT, std::move(TSM)));
+
       InitializeModuleAndPassManager();
 
       // Search the JIT for the __anon_expr symbol.
@@ -697,7 +702,8 @@ int main() {
   fprintf(stderr, "ready> ");
   getNextToken();
 
-  TheJIT = ExitOnErr(KaleidoscopeJIT::Create());
+  TheJIT = ExitOnErr(LLJITBuilder().create());
+  TheJIT->getMainJITDylib().addGenerator(cantFail(DynamicLibrarySearchGenerator::GetForCurrentProcess(TheJIT->getDataLayout().getGlobalPrefix())));
 
   InitializeModuleAndPassManager();
 
